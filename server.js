@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const products = require('./routes/products')
+const properties = require('./routes/properties')
 const users = require('./routes/users.js')
 
 //package that allows express to read environment variables
@@ -67,6 +68,12 @@ server.use(
     '/users',
     users
 )
+
+server.use(
+    '/properties',
+    properties
+)
+
 
 //use heroku port nummber if it exists otherwise use 3001
 const port = process.env.PORT || 3001;
