@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const products = require('./routes/products')
-const properties = require('./routes/properties')
+const properties = require('./routes/properties.js')
 const users = require('./routes/users.js')
 
 //package that allows express to read environment variables
@@ -59,6 +59,21 @@ server.get(
         res.send("<h1>Contact Us</h1>");
     }
 );
+
+server.get(
+    '/login',                            // http://localhost:3001/login
+    (req, res) => {
+        res.send("<h1>Please login to your account</h1>");
+    }
+);
+
+server.get(
+    '/listing',                            // http://localhost:3001/listing
+    (req, res) => {
+        res.send("<h1>List of available properties</h1>");
+    }
+);
+
 
 server.use(
     '/product',

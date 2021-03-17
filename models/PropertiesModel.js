@@ -17,11 +17,11 @@ const PropertiesSchema = new mongoose.Schema(
             required: true
         },
         price: {
-            type: String
+            type: String,
             required: true
         },
         beds: {
-            type: String
+            type: String,
             required: true
         },
         size: {
@@ -29,7 +29,7 @@ const PropertiesSchema = new mongoose.Schema(
         },
         condition: {
             type: String
-        }
+        },
     }
 )
 

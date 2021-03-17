@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const PropertiesModel = require('../models/PropertiesModel.js');
+const PropertiesModel = require('../models/PropertiesModel');
 
 router.get(
     '/',                 //http://www.myapp.com/product/
     (req, res) => {
 
-        ProductsModel
-        .find({ model: '' })
+        PropertiesModel
+        .find({ propertyNumber: req.body.propertyNumber })
         .then(
             (dbDocuments) => {
                 res.send(dbDocuments)
@@ -28,7 +28,7 @@ router.post(
 
         // Capture the data in the BODY section
         const formData = {
-            propertyType: req.body.propertyNumber,
+            propertyType: req.body.propertyType,
             propertyNumber: req.body.propertyNumber,
             location: req.body.location,
             price: req.body.price,

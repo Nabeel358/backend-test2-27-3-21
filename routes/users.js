@@ -29,7 +29,7 @@ router.post(
                 // 3.1) If email exists
                 if(dbDocument) {
                     // Then reject registration
-                    res.send("Sorry. An account with thay email already exists");
+                    res.send("Sorry. An account with this email already exists");
                 }
                 // 3.2) If email does not exists
                 else {
@@ -67,5 +67,35 @@ router.post(
 
     }
 );
+
+
+router.post(
+    '/update',
+    (req, res) => {
+
+        UsersModel
+        .findOneAndUpdate(
+            {
+                'email': req.body.email
+            },
+            {
+                $set: {
+                    lastName: req.body.lastName
+                }
+            }
+        )
+        .then(
+            (dbDocument) => {
+                res.send(dbDocument)
+            }
+        )
+        .catch(
+            (error) => {
+                console.log(error)
+            }
+        )
+    }
+)
+
 
 module.exports = router;
