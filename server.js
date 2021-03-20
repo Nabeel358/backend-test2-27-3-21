@@ -3,8 +3,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const products = require('./routes/products')
+const cors = require('cors');
 const properties = require('./routes/properties.js')
-const users = require('./routes/users.js')
+const users = require('./routes/users.js');
 
 //package that allows express to read environment variables
 require('dotenv').config();
@@ -31,6 +32,11 @@ mongoose
             console.log('error occured', error)
         }
     )
+
+// Tell express to allow CORS (Cross-Origin Resource Sharing)
+server.use(cors());
+
+
 
 //tell express how to use body parser
     server.use( bodyParser.urlencoded({extended: false}));
