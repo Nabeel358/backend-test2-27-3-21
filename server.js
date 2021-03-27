@@ -2,12 +2,59 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const products = require('./routes/products')
+const expressFormData = require('express-form-data');
 const cors = require('cors');
-const properties = require('./routes/properties.js')
+const cloudinary = require('cloudinary').v2;
+const products = require('./routes/products.js');
 const users = require('./routes/users.js');
+const properties = require('./routes/properties.js');
 
-//package that allows express to read environment variables
+// Import passport
+const passport = require('passport');
+// Import the strategies & way to extract the jsonwebtoken
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+
+// The same secret in routes/UsersRoutes will be needed
+// to read the jsonwebtoken
+const secret = process.env.SECRET;
+
+// Options for passport-jwt
+const passportJwtOptions = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: secret
+};
+
+// This function is what will read the contents (payload) of the jsonwebtoken
+const passportJwt = (passport) => {
+    passport.use(
+        new JwtStrategy(
+            passportJwtOptions, 
+            (jwtPayload, done) => {
+
+                // Extract and find the user by their id (contained jwt)
+                UsersModel.findOne({ _id: jwtPayload.id })
+                .then(
+                    // If the document was found
+                    (document) => {
+                        return done(null, document);
+                    }
+                )
+                .catch(
+                    // If something went wrong with database search
+                    (err) => {
+                        return done(null, null);
+                    }
+                )
+            }
+        )
+    )
+};
+
+// Invoke passportJwt and pass the passport npm package as argument
+passportJwt(passport);
+
+// A package that allows express to read environment variables (like CONNECTION_STRING)
 require('dotenv').config();
 
 // Create a server object
@@ -15,7 +62,7 @@ const server = express();
 
 // Connect to the database using mongoose
 // Note: make sure to put your connection string!
-const connectionString = process.env.CONNECTION_STRING
+const connectionString = process.env.CONNECTION_STRING;
 const connectionConfig = { 
     useNewUrlParser: true, 
     useUnifiedTopology: true 
@@ -33,16 +80,26 @@ mongoose
         }
     )
 
+// Configure for Cloudinary
+cloudinary.config(
+    {
+        cloud_name: process.env.CLOUD_NAME,
+        api_key: process.env.API_KEY,
+        api_secret: process.env.API_SECRET
+    }
+)
+
 // Tell express to allow CORS (Cross-Origin Resource Sharing)
-server.use(cors());
+server.use(cors());    
 
+// Tell express how to use body-parser
+server.use( bodyParser.urlencoded({ extended: false }) );
 
+// Also tell express to recognize JSON
+server.use( bodyParser.json() );
 
-//tell express how to use body parser
-    server.use( bodyParser.urlencoded({extended: false}));
-
-//also tell express to recognize jsob
-    server.use(bodyParser.json());
+// Also tell express to read HTTP form data
+server.use(expressFormData.parse());
 
 // Create a Route
 server.get(
@@ -52,51 +109,24 @@ server.get(
     }
 );
 
-server.get(
-    '/about',                            // http://localhost:3001/about
-    (req, res) => {
-        res.send("<h1>About Us</h1>");
-    }
-);
-
-server.get(
-    '/contact',                            // http://localhost:3001/contact
-    (req, res) => {
-        res.send("<h1>Contact Us</h1>");
-    }
-);
-
-server.get(
-    '/login',                            // http://localhost:3001/login
-    (req, res) => {
-        res.send("<h1>Please login to your account</h1>");
-    }
-);
-
-server.get(
-    '/listing',                            // http://localhost:3001/listing
-    (req, res) => {
-        res.send("<h1>List of available properties</h1>");
-    }
-);
-
-
 server.use(
-    '/product',
+    '/product', //http://www.myapp.com/product/
+    //passport.authenticate('jwt', {session:false}),
     products
 )
+
 server.use(
-    '/users',
+    '/users', //http://www.myapp.com/users/
     users
 )
 
 server.use(
-    '/properties',
+    '/properties', //http://www.myapp.com/properties/
     properties
 )
 
 
-//use heroku port nummber if it exists otherwise use 3001
+// Use Heroku port number if it exists otherwise use 3001
 const port = process.env.PORT || 3001;
 server.listen(
     port, 
